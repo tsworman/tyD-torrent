@@ -1,0 +1,11 @@
+[package]
+name = "tyd-torrent"
+version = "0.1.0"
+authors = ["Tyler Worman <nova1313@novaslp.net>"]
+
+homepage = "http://novaslp.net"
+
+[dependencies]
+bip_metainfo = "0.2.0"
+bip_util = "0.4.0"
+
