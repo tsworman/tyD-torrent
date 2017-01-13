@@ -1,11 +1,11 @@
 extern crate bip_metainfo;
 
-use std::fs::File;
-use std::path::{Path};
+use std::fs::{File};
+use std::path::{Path, PathBuf};
 use std::io::{self, Write, Read, BufRead, prelude};
 use std::env;
 use std::error::Error;
-
+use std::collections::LinkedList;
 
 use bip_metainfo::{MetainfoBuilder, MetainfoFile};
 use bip_metainfo::error::{ParseResult};
@@ -18,6 +18,7 @@ use bip_metainfo::error::{ParseResult};
     }
 }
 
+//Main function - Read torrent file and compare to directory.
 fn main() {
     if env::args().len() < 3 {
 	    help();
@@ -39,26 +40,26 @@ fn main() {
     
     // Read the file contents into a string, returns `io::Result<usize>`
     let mut buffer = std::vec::Vec::new();
-    file.read_to_end(&mut buffer);
-    //match file.read_to_string(&mut s) {
-    //    Err(why) => panic!("couldn't read {}: {}", display,
-    //			   why.description()),
-    //	    Ok(_) => print!("Good!"),
-    //	    //{} contains:\n{}", display, s),
-    //	    }
+    match file.read_to_end(&mut buffer) {
+        Err(why) => panic!("couldn't read {}: {}", display,
+    			   why.description()),
+    	    Ok(_) => {},
+    }
     
     let mut mif = MetainfoFile::from_bytes(buffer).unwrap();
-    // `file` goes out of scope, and the "hello.txt" file gets closed
+
     let mut files = mif.info().files();
+    let mut filePaths = LinkedList::new();
     for file in files {
-	    let mut path = String::from("");
+	    let mut pathBuf  = PathBuf::from("");
 	    for pp in file.paths() {
-		    path.push('/');
-		    path.push_str(pp);
+		     pathBuf.push(pp);
 		}
-		println!("{}", path);
+	    
+	    filePaths.push_back(pathBuf);
 	}
     println!("{}", mif.info().is_private());
+    //filePaths.contains(
 }
 
 fn help() {
@@ -71,4 +72,7 @@ fn help() {
     println!("This was developed to facilitate updating directories whose file listing had changed since the last update of that torrent");
 }
 
+fn read_torrent() {
+
+}
 
