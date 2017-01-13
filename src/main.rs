@@ -1,13 +1,14 @@
 extern crate bip_metainfo;
-
-use std::fs::{File};
-use std::fs;
+extern crate walkdir;
+    
+use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::io::{self, Write, Read, BufRead, prelude};
 use std::env;
 use std::error::Error;
 use std::collections::LinkedList;
 
+use walkdir::WalkDir;
 use bip_metainfo::{MetainfoBuilder, MetainfoFile};
 use bip_metainfo::error::{ParseResult};
 
@@ -63,15 +64,16 @@ fn main() {
 
     //Read paths from the stated directory
     let sysPaths = fs::read_dir(&args[2]).unwrap();
-
-    for paths in sysPaths {
-	    let pathy = PathBuf::from(paths.unwrap().path().display().to_string());
-	    let testPathy = pathy.display().to_string().replace(&args[2], "");
+    //was syspaths
+    for paths in WalkDir::new(&args[2]){
+	    let pathStr = paths.unwrap().path().display().to_string();
+	    let testPathy = pathStr.replace(&args[2], "");
+	    let pathy = PathBuf::from(testPathy);
 	    println!("Trying to match: {}", pathy.display());
 	    if filePaths.contains(&pathy) {
 		    println!("Matched!");
 		} else {
-		println!("Delete: {}", testPathy);
+		println!("Delete: {}", pathy.display());
 	    }
 			
 	}

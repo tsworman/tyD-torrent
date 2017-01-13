@@ -8,4 +8,4 @@ homepage = "http://novaslp.net"
 [dependencies]
 bip_metainfo = "0.2.0"
 bip_util = "0.4.0"
-
+walkdir = "1"
