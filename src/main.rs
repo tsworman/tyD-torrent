@@ -1,6 +1,7 @@
 extern crate bip_metainfo;
 
 use std::fs::{File};
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::io::{self, Write, Read, BufRead, prelude};
 use std::env;
@@ -47,18 +48,33 @@ fn main() {
     }
     
     let mut mif = MetainfoFile::from_bytes(buffer).unwrap();
-
     let mut files = mif.info().files();
     let mut filePaths = LinkedList::new();
+    
     for file in files {
 	    let mut pathBuf  = PathBuf::from("");
 	    for pp in file.paths() {
 		     pathBuf.push(pp);
 		}
-	    
+	    println!("{}",pathBuf.display());
 	    filePaths.push_back(pathBuf);
 	}
     println!("{}", mif.info().is_private());
+
+    //Read paths from the stated directory
+    let sysPaths = fs::read_dir(&args[2]).unwrap();
+
+    for paths in sysPaths {
+	    let pathy = PathBuf::from(paths.unwrap().path().display().to_string());
+	    let testPathy = pathy.display().to_string().replace(&args[2], "");
+	    println!("Trying to match: {}", pathy.display());
+	    if filePaths.contains(&pathy) {
+		    println!("Matched!");
+		} else {
+		println!("Delete: {}", testPathy);
+	    }
+			
+	}
     //filePaths.contains(
 }
 
