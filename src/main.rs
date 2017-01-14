@@ -1,6 +1,7 @@
 extern crate bip_metainfo;
 extern crate walkdir;
-    
+extern crate clap;
+
 use std::fs::{File};
 use std::path::{Path, PathBuf};
 use std::io::{Read};
@@ -8,6 +9,7 @@ use std::env;
 use std::error::Error;
 use std::collections::LinkedList;
 
+use clasp::{App};
 use walkdir::WalkDir;
 use bip_metainfo::{MetainfoFile};
 
@@ -21,6 +23,8 @@ use bip_metainfo::{MetainfoFile};
 
 //Main function - Read torrent file and compare to directory.
 fn main() {
+
+    
     if env::args().len() < 3 {
 	    help();
 	    //exit();
@@ -69,7 +73,6 @@ fn main() {
     
         let file_metadata = path_result.metadata().unwrap();
         let file_type = file_metadata.file_type();
-        println!("Trying to match: {}", path_buffer.display());
         if !file_type.is_dir() {
             if !torrent_file_paths.contains(&path_buffer) {
                 println!("Delete: {}", path_buffer.display());
