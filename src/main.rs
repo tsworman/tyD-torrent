@@ -1,16 +1,15 @@
 extern crate bip_metainfo;
 extern crate walkdir;
     
-use std::fs::{self, File};
+use std::fs::{File};
 use std::path::{Path, PathBuf};
-use std::io::{self, Write, Read, BufRead, prelude};
+use std::io::{Read};
 use std::env;
 use std::error::Error;
 use std::collections::LinkedList;
 
 use walkdir::WalkDir;
-use bip_metainfo::{MetainfoBuilder, MetainfoFile};
-use bip_metainfo::error::{ParseResult};
+use bip_metainfo::{MetainfoFile};
 
 #[cfg(test)]
     mod tests {
@@ -27,7 +26,7 @@ fn main() {
 	    //exit();
     }
 
-    let mut args: Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
     let path = Path::new(&args[1]);
     let display = path.display();
     
@@ -48,36 +47,40 @@ fn main() {
     	    Ok(_) => {},
     }
     
-    let mut mif = MetainfoFile::from_bytes(buffer).unwrap();
-    let mut files = mif.info().files();
-    let mut filePaths = LinkedList::new();
+    let mif = MetainfoFile::from_bytes(buffer).unwrap();
+    let files = mif.info().files();
+    let mut torrent_file_paths = LinkedList::new();
     
     for file in files {
-	    let mut pathBuf  = PathBuf::from("");
+	    let mut path_buffer  = PathBuf::from("");
 	    for pp in file.paths() {
-		     pathBuf.push(pp);
+		    path_buffer.push(pp);
 		}
-	    println!("{}",pathBuf.display());
-	    filePaths.push_back(pathBuf);
+	    torrent_file_paths.push_back(path_buffer);
 	}
-    println!("{}", mif.info().is_private());
-
+    
     //Read paths from the stated directory
-    let sysPaths = fs::read_dir(&args[2]).unwrap();
     //was syspaths
     for paths in WalkDir::new(&args[2]){
-	    let pathStr = paths.unwrap().path().display().to_string();
-	    let testPathy = pathStr.replace(&args[2], "");
-	    let pathy = PathBuf::from(testPathy);
-	    println!("Trying to match: {}", pathy.display());
-	    if filePaths.contains(&pathy) {
-		    println!("Matched!");
-		} else {
-		println!("Delete: {}", pathy.display());
-	    }
-			
-	}
+        let path_result = paths.unwrap();
+        let path_string = path_result.path().display().to_string();
+        let path_to_test = path_string.replace(&args[2], "");
+        let path_buffer = PathBuf::from(path_to_test);
+    
+        let file_metadata = path_result.metadata().unwrap();
+        let file_type = file_metadata.file_type();
+        println!("Trying to match: {}", path_buffer.display());
+        if !file_type.is_dir() {
+            if !torrent_file_paths.contains(&path_buffer) {
+                println!("Delete: {}", path_buffer.display());
+            }
+        }	
+    }
     //filePaths.contains(
+}
+
+fn read_torrent() {
+
 }
 
 fn help() {
@@ -90,7 +93,4 @@ fn help() {
     println!("This was developed to facilitate updating directories whose file listing had changed since the last update of that torrent");
 }
 
-fn read_torrent() {
-
-}
 
