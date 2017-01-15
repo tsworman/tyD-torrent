@@ -6,6 +6,7 @@ authors = ["Tyler Worman <nova1313@novaslp.net>"]
 homepage = "http://novaslp.net"
 
 [dependencies]
+clap = {version = "2.20.0", features = ["yaml"]}
 bip_metainfo = "0.2.0"
 bip_util = "0.4.0"
 walkdir = "1"
