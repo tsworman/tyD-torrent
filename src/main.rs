@@ -3,7 +3,7 @@ extern crate walkdir;
 #[macro_use]
 extern crate clap;
 
-use std::fs::File;
+use std::fs::{self,File};
 use std::path::PathBuf;
 use std::io::Read;
 use std::error::Error;
@@ -25,7 +25,7 @@ fn main() {
 			    (version: "1.0")
 			    (author: "Tyler Worman <nova1313@novaslp.net")
 			    (about: "Cleans a previously downloaded torrent directory by removing files not found in a newer verison of the same torrent. Designed for use with MAME sets.")
-			    (@arg CONFIG: -d --delete "Deletes the files found.")
+			    (@arg DELETE: -d --delete "Deletes the files found.")
 			    (@arg INPUT: +required "The torrent to use.")
 			    (@arg INPUTDIR: + required "The directory to scan for un-needed files.")
 			    ).get_matches();
@@ -33,8 +33,6 @@ fn main() {
     let torrent_file_paths = read_torrent(matches.value_of("INPUT").unwrap()); //LinkedList::new
     
     //Read paths from the stated directory
-    //was syspaths
-    
     for paths in WalkDir::new(matches.value_of("INPUTDIR").unwrap()){
         let path_result = paths.unwrap();
         let path_string = path_result.path().display().to_string();
@@ -47,21 +45,25 @@ fn main() {
         if !file_type.is_dir() {
             if !torrent_file_paths.contains(&path_buffer) {
                 println!("Delete: {}", path_buffer.display());
+
+		if matches.is_present("DELETE") {
+			match fs::remove_file(path_string) {
+			    Err(why) => panic!("Can't delete: {}", why.description()),
+				Ok(_) => {},
+			}
+	        }
             }
         }	
     }
-    //filePaths.contains(
 }
 
 fn read_torrent(torrent_file: &str) -> LinkedList<PathBuf> {
-    // Open the path in read-only mode, returns `io::Result<File>`
     let mut file = match File::open(torrent_file) {
         Err(why) => panic!("couldn't open {}: {}", torrent_file,
 			   why.description()),
         Ok(file) => file,
     };
     
-    // Read the file contents into a string, returns `io::Result<usize>`
     let mut buffer = std::vec::Vec::new();
     match file.read_to_end(&mut buffer) {
         Err(why) => panic!("couldn't read {}: {}", torrent_file,
@@ -79,7 +81,7 @@ fn read_torrent(torrent_file: &str) -> LinkedList<PathBuf> {
 		    path_buffer.push(&pp);
 	    }
 	    torrent_file_paths.push_back(path_buffer);
-	}
+    }
 
     torrent_file_paths
 
